@@ -2,6 +2,6 @@ package client;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello, client!");
+        System.out.println("Hello, Client!");
     }
 }
