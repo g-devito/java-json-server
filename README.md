@@ -58,45 +58,12 @@ task/
 
 ---
 
-## 🔧 How to Run
-
-### Prerequisites
-- Java 11+
-- IntelliJ IDEA (Community or Ultimate)
-
-### Server
-```bash
-cd task/server
-java Main
-```
-
-### Client
-Open another terminal:
-```bash
-cd task/client
-java Main
-```
-
----
-
-## 📈 Version Control
-
-This project uses the `main` branch as the **default and only working branch**. The legacy `master` branch has been removed to maintain consistency with modern Git conventions.
-
----
-
 ## 💡 Future Improvements
 
 - Add persistent file-based storage
 - Use JSON libraries like Gson or Jackson
 - Create a simple web frontend for interaction
 - Add unit tests and logging
-
----
-
-## 🤝 Contributions
-
-While this is a learning project, constructive feedback and contributions are welcome. Feel free to fork, improve, or use it as inspiration for your own work.
 
 ---
 
@@ -108,5 +75,5 @@ This project is released under the MIT License.
 
 ## 🧑‍💻 Author
 
-Giovanni Devito  
-[LinkedIn](https://www.linkedin.com/in/giovanni-de-vito-39084a210/) • [Portfolio](https://workinprogress.com) • [Email](mailto:giodevito99@gmail.com)
+Giovanni De Vito  
+[LinkedIn](https://www.linkedin.com/in/giovanni-de-vito-39084a210/) • [Email](mailto:giodevito99@gmail.com)
