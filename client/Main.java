@@ -5,86 +5,73 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-//import java.util.Scanner;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
-//        String[] database = new String[1000];
-//        Scanner scanner = new Scanner(System.in);
+        Map<String, String> flags = parseFlags(args);
+
+        String cmdType = flags.get("-t");
+        String index = flags.get("-i");
+        String message = flags.get("-m");
+
+        if (cmdType == null) {
+            System.out.println("Missing required -t <type> argument.");
+            return;
+        }
+
+        String msg;
+        switch (cmdType) {
+            case "get" -> {
+                if (index == null) {
+                    System.out.println("Missing required -i <index> for 'get'");
+                    return;
+                }
+                msg = String.format("get %s", index);
+            }
+            case "set" -> {
+                if (index == null || message == null) {
+                    System.out.println("Missing required -i <index> and/or -m <message> for 'set'");
+                    return;
+                }
+                msg = String.format("set %s %s", index, message);
+            }
+            case "delete" -> {
+                if (index == null) {
+                    System.out.println("Missing required -i <index> for 'delete'");
+                    return;
+                }
+                msg = String.format("delete %s", index);
+            }
+            case "exit" -> msg = "exit";
+            default -> {
+                System.out.println("Invalid command type: " + cmdType);
+                return;
+            }
+        }
+
         String address = "127.0.0.1";
         int port = 23456;
+
         try (
                 Socket socket = new Socket(InetAddress.getByName(address), port);
                 DataInputStream input = new DataInputStream(socket.getInputStream());
                 DataOutputStream output = new DataOutputStream(socket.getOutputStream())
         ) {
-            String msg = "Give me a record # 12";
             System.out.println("Client started!");
             output.writeUTF(msg);
             System.out.printf("Sent: %s%n", msg);
             System.out.printf("Received: %s%n", input.readUTF());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Client error: " + e.getMessage(), e);
         }
+    }
 
-//        while (true) {
-//            String input = scanner.nextLine().trim();
-//            int index;
-//            String value;
-//
-//            if (input.isEmpty()) continue;
-//
-//            String[] inputArray = input.split(" ", 3);
-//            String verb = inputArray[0];
-//
-//            switch (verb) {
-//                case "set":
-//                    if (inputArray.length != 3) {
-//                        System.out.println("ERROR");
-//                        continue;
-//                    }
-//                    index = Integer.parseInt(inputArray[1]);
-//                    value = inputArray[2];
-//                    if (index > 1000)
-//                        System.out.println("ERROR");
-//                    else {
-//                        database[index] = value;
-//                        System.out.println("OK");
-//                    }
-//                    break;
-//                case "get":
-//                    if (inputArray.length != 2) {
-//                        System.out.println("ERROR");
-//                        continue;
-//                    }
-//                    index = Integer.parseInt(inputArray[1]);
-//                    if (index > 1000 || database[index] == null)
-//                        System.out.println("ERROR");
-//                    else
-//                        System.out.println(database[index]);
-//                    break;
-//                case "delete":
-//                    if (inputArray.length != 2) {
-//                        System.out.println("ERROR");
-//                        continue;
-//                    }
-//                    index = Integer.parseInt(inputArray[1]);
-//                    if (index > 1000)
-//                        System.out.println("ERROR");
-//                    else {
-//                        database[index] = null;
-//                        System.out.println("OK");
-//                    }
-//                    break;
-//                case "exit":
-//                    if (inputArray.length != 1) {
-//                        System.out.println("ERROR");
-//                        continue;
-//                    }
-//                    return;
-//                default:
-//                    System.out.printf("wrong verb: %s%n", verb);
-//            }
-//        }
+    private static Map<String, String> parseFlags(String[] args) {
+        Map<String, String> map = new HashMap<>();
+        for (int i = 0; i < args.length - 1; i+=2)
+                map.put(args[i], args[i + 1]);
+        return map;
     }
 }
