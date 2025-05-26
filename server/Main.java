@@ -1,5 +1,8 @@
 package server;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,10 +11,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Main {
+    public static JsonObject database = new JsonObject();
+    static Gson gson = new Gson();
 
     public static void main(String[] args) {
-        String[] database = new String[1000];
         String address = "127.0.0.1";
+
         int port = 23456;
         System.out.println("Server started!");
 
@@ -28,7 +33,7 @@ public class Main {
                     try {
                         receivedMsg = input.readUTF();
                     } catch (IOException e) {
-                        continue; // bad client, skip
+                        continue;
                     }
 
                     if (receivedMsg.isEmpty()) {
@@ -36,62 +41,50 @@ public class Main {
                         continue;
                     }
 
-                    String[] inputArray = receivedMsg.split(" ", 3);
-                    String command = inputArray[0];
+                    Request request = gson.fromJson(receivedMsg, Request.class);
+                    String type = request.getType();
+                    String key = request.getKey();
 
-                    switch (command) {
+                    switch (type) {
                         case "set": {
-                            if (inputArray.length != 3) {
-                                output.writeUTF("ERROR");
-                                break;
-                            }
-                            int index = parseIndex(inputArray[1]);
-                            String value = inputArray[2];
-                            if (indexInvalid(index)) {
-                                output.writeUTF("ERROR");
-                            } else {
-                                database[index] = value;
-                                output.writeUTF("OK");
-                            }
+                            String value = request.getValue();
+                            database.addProperty(key, value);
+                            if (database.get(key).getAsString().equals(value))
+                                output.writeUTF("{ \"response\": \"OK\" }");
                             break;
                         }
 
                         case "get": {
-                            if (inputArray.length != 2) {
-                                output.writeUTF("ERROR");
+                            if (!database.has(key)) {
+                                output.writeUTF("{\"response\":\"ERROR\",\"reason\":\"No such key\"}");
                                 break;
                             }
-                            int index = parseIndex(inputArray[1]);
-                            if (indexInvalid(index) || database[index] == null) {
-                                output.writeUTF("ERROR");
-                            } else {
-                                output.writeUTF(database[index]);
-                            }
+                            output.writeUTF(String.format(
+                                    "{\"response\":\"OK\",\"value\":\"%s\"}",
+                                    database.get(key).getAsString())
+                            );
                             break;
                         }
 
                         case "delete": {
-                            if (inputArray.length != 2) {
-                                output.writeUTF("ERROR");
+                            if (!database.has(key)) {
+                                output.writeUTF("{\"response\":\"ERROR\",\"reason\":\"No such key\"}");
                                 break;
                             }
-                            int index = parseIndex(inputArray[1]);
-                            if (indexInvalid(index)) {
-                                output.writeUTF("ERROR");
-                            } else {
-                                database[index] = null;
-                                output.writeUTF("OK");
-                            }
+                            database.remove(key);
+                            output.writeUTF("{\"response\":\"OK\"}");
                             break;
                         }
 
-                        case "exit":
-                            output.writeUTF("OK");
+                        case "exit": {
+                            output.writeUTF("{\"response\":\"OK\"}");
                             running = false;
                             break;
+                        }
 
-                        default:
-                            output.writeUTF("ERROR");
+                        default: {
+                            output.writeUTF("{\"response\":\"ERROR\"}");
+                        }
                     }
                 } catch (IOException e) {
                     System.out.println("Client error: " + e.getMessage());
@@ -103,17 +96,4 @@ public class Main {
         }
     }
 
-    // Converts user index (1-1000) to internal index (0-999)
-    private static int parseIndex(String input) {
-        try {
-            return Integer.parseInt(input) - 1;
-        } catch (NumberFormatException e) {
-            return -1;
-        }
-    }
-
-    // Validates internal index is within array bounds
-    private static boolean indexInvalid(int index) {
-        return index < 0 || index >= 1000;
-    }
 }

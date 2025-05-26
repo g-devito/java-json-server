@@ -10,43 +10,52 @@ import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
+        String msg;
         Map<String, String> flags = parseFlags(args);
 
-        String cmdType = flags.get("-t");
-        String index = flags.get("-i");
-        String message = flags.get("-m");
+        String key = flags.get("-k");
+        String type = flags.get("-t");
+        String value = flags.get("-v");
 
-        if (cmdType == null) {
+        if (type == null) {
             System.out.println("Missing required -t <type> argument.");
             return;
         }
 
-        String msg;
-        switch (cmdType) {
+
+        switch (type) {
             case "get" -> {
-                if (index == null) {
-                    System.out.println("Missing required -i <index> for 'get'");
+                if (key == null) {
+                    System.out.println("Missing required -k <key> for 'get'");
                     return;
                 }
-                msg = String.format("get %s", index);
+                msg = String.format("{\"type\":\"get\",\"key\":\"%s\"}", key);
+
             }
             case "set" -> {
-                if (index == null || message == null) {
-                    System.out.println("Missing required -i <index> and/or -m <message> for 'set'");
+                if (key == null || value == null) {
+                    System.out.println("Missing required -k <key> and/or -v <value> for 'set'");
                     return;
                 }
-                msg = String.format("set %s %s", index, message);
+                msg = String.format(
+                        "{\"type\":\"set\",\"key\":\"%s\",\"value\":\"%s\"}",
+                        key,
+                        value
+                );
             }
             case "delete" -> {
-                if (index == null) {
-                    System.out.println("Missing required -i <index> for 'delete'");
+                if (key == null) {
+                    System.out.println("Missing required -k <key> for 'delete'");
                     return;
                 }
-                msg = String.format("delete %s", index);
+                msg = String.format(
+                        "{\"type\":\"delete\",\"key\":\"%s\"}",
+                        key
+                );
             }
-            case "exit" -> msg = "exit";
+            case "exit" -> msg = "{\"type\":\"exit\"}";
             default -> {
-                System.out.println("Invalid command type: " + cmdType);
+                System.out.println("Invalid command type: " + type);
                 return;
             }
         }
@@ -70,8 +79,8 @@ public class Main {
 
     private static Map<String, String> parseFlags(String[] args) {
         Map<String, String> map = new HashMap<>();
-        for (int i = 0; i < args.length - 1; i+=2)
-                map.put(args[i], args[i + 1]);
+        for (int i = 0; i < args.length - 1; i += 2)
+            map.put(args[i], args[i + 1]);
         return map;
     }
 }
