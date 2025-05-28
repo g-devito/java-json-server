@@ -28,7 +28,6 @@ public class Server {
         return invoker.process(request);
     }
 
-
     private static boolean handleRequest(Socket socket) {
         try (
                 DataInputStream input = new DataInputStream(socket.getInputStream());

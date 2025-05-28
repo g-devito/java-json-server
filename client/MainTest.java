@@ -30,6 +30,7 @@ public class MainTest {
         // 4. Get a value again after deletion (will return error, but still valid input)
         requests.add(new Request("get", "age", null));
 
+
         // 5. Exit
         requests.add(new Request("exit", "", null));
 
